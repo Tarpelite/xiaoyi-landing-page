@@ -6,11 +6,7 @@
   },
   "routes": [
     {
-      "pattern": "actscal.org",
-      "custom_domain": true
-    },
-    {
-      "pattern": "www.actscal.org",
+      "pattern": "xiaoyi.actscal.org",
       "custom_domain": true
     }
   ]
