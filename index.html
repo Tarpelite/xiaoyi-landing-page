@@ -636,12 +636,15 @@
     }
 
     .leaderboard-row.highlight-ours {
-      background: linear-gradient(135deg, rgba(0, 51, 102, 0.08), rgba(124, 58, 237, 0.05));
-      border: 1px solid rgba(0, 51, 102, 0.15);
+      background: transparent;
+    }
+
+    .leaderboard-row.highlight-ours:hover {
+      background: rgba(0, 51, 102, 0.02);
     }
 
     .leaderboard-row.highlight-ours .rank {
-      color: var(--beihang-blue);
+      color: var(--text-muted);
     }
 
     .ours-tag {
@@ -1041,7 +1044,8 @@
       </div>
       
       <h1 class="hero-title">
-        <span class="highlight">Xiaoyi Guess</span>
+        Make Time Series<br>
+        <span class="highlight">Forecast Great Again</span>
       </h1>
       
       <p class="hero-subtitle">
