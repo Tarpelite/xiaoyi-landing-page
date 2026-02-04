@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小易猜猜 | Make Time Series Forecast Great Again</title>
+  <link rel="icon" type="image/png" href="https://pub-67912da6dc924ee880a83954ec1c0107.r2.dev/favoricon.png">
+  <link rel="apple-touch-icon" href="https://pub-67912da6dc924ee880a83954ec1c0107.r2.dev/favoricon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --beihang-blue: #003366;
+      --beihang-blue-light: #004d99;
+      --purple-accent: #7c3aed;
+      --purple-light: #a78bfa;
+      --bg-primary: #fafbff;
+      --bg-card: #ffffff;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ========== Hero Section ========== */
+    .hero {
+      min-height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      max-width: 900px;
+    }
+
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--beihang-blue);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 100px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .logo-badge svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .hero-title {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    .hero-title .highlight {
+      background: linear-gradient(135deg, var(--beihang-blue) 0%, var(--purple-accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1.125rem, 3vw, 1.5rem);
+      color: var(--text-secondary);
+      margin-bottom: 3rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--beihang-blue);
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      font-size: 1.125rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      animation: fadeInUp 0.8s ease-out 0.6s both;
+      box-shadow: 0 4px 24px rgba(0, 51, 102, 0.3);
+    }
+
+    .hero-cta:hover {
+      background: var(--beihang-blue-light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0, 51, 102, 0.4);
+    }
+
+    .hero-cta svg {
+      transition: transform 0.3s ease;
+    }
+
+    .hero-cta:hover svg {
+      transform: translateX(4px);
+    }
+
+    .hero-cta.demo-coming-soon {
+      background: var(--text-muted);
+      cursor: default;
+      box-shadow: none;
+    }
+
+    .hero-cta.demo-coming-soon:hover {
+      background: var(--text-muted);
+      transform: none;
+      box-shadow: none;
+    }
+
+    .hero-cta.demo-coming-soon svg {
+      animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Scroll indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      animation: bounce 2s infinite;
+    }
+
+    .scroll-indicator svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* ========== Features Section ========== */
+    .features {
+      padding: 6rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--purple-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      color: var(--beihang-blue);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border-radius: 24px;
+      padding: 2.5rem;
+      border: 1px solid rgba(0, 51, 102, 0.08);
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--beihang-blue), var(--purple-accent));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 24px 48px rgba(0, 51, 102, 0.12);
+    }
+
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .feature-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .feature-card:nth-child(1) .feature-icon {
+      background: linear-gradient(135deg, rgba(0, 51, 102, 0.1), rgba(0, 51, 102, 0.05));
+    }
+
+    .feature-card:nth-child(2) .feature-icon {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(124, 58, 237, 0.05));
+    }
+
+    .feature-icon svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .feature-card:nth-child(1) .feature-icon svg {
+      color: var(--beihang-blue);
+    }
+
+    .feature-card:nth-child(2) .feature-icon svg {
+      color: var(--purple-accent);
+    }
+
+    .feature-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+
+    .feature-desc {
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+      line-height: 1.7;
+    }
+
+    .feature-list {
+      list-style: none;
+    }
+
+    .feature-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+    }
+
+    .feature-list li svg {
+      width: 20px;
+      height: 20px;
+      color: var(--beihang-blue);
+      flex-shrink: 0;
+    }
+
+    .feature-card:nth-child(2) .feature-list li svg {
+      color: var(--purple-accent);
+    }
+
+    /* Feature card image */
+    .feature-image {
+      margin-top: 1.5rem;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      border: 1px solid rgba(0, 51, 102, 0.1);
+      overflow: hidden;
+    }
+
+    .feature-image img,
+    .feature-image video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+
+    /* ========== Demo Section ========== */
+    .demo {
+      padding: 6rem 2rem;
+      background: linear-gradient(180deg, var(--bg-primary) 0%, rgba(0, 51, 102, 0.03) 100%);
+    }
+
+    .demo-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .demo-content {
+      text-align: center;
+    }
+
+    .demo-preview {
+      margin-top: 3rem;
+      background: var(--bg-card);
+      border-radius: 24px;
+      padding: 1.5rem;
+      box-shadow: 0 24px 64px rgba(0, 51, 102, 0.1);
+      border: 1px solid rgba(0, 51, 102, 0.08);
+    }
+
+    .demo-window {
+      background: #1e293b;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .demo-window-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 1.5rem;
+      background: #0f172a;
+    }
+
+    .demo-window-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .demo-window-dot:nth-child(1) { background: #ef4444; }
+    .demo-window-dot:nth-child(2) { background: #eab308; }
+    .demo-window-dot:nth-child(3) { background: #22c55e; }
+
+    .demo-window-content {
+      padding: 0;
+      height: 450px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+      font-size: 0.875rem;
+      overflow: hidden;
+    }
+
+    .demo-window-content img,
+    .demo-window-content video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #1e293b;
+    }
+
+    .demo-placeholder {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .demo-placeholder svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    /* ========== Tech Stack Section ========== */
+    .tech-stack {
+      padding: 6rem 2rem;
+      background: var(--bg-card);
+    }
+
+    .tech-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .tech-content {
+      margin-top: 3rem;
+    }
+
+    .tech-highlight {
+      text-align: center;
+      padding: 3rem;
+      background: linear-gradient(135deg, rgba(0, 51, 102, 0.03), rgba(124, 58, 237, 0.03));
+      border-radius: 24px;
+      margin-bottom: 3rem;
+      border: 1px solid rgba(0, 51, 102, 0.08);
+    }
+
+    .tech-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--beihang-blue);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1.5rem;
+    }
+
+    .tech-badge svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .tech-headline {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 700;
+      color: var(--beihang-blue);
+      margin-bottom: 1rem;
+    }
+
+    .tech-desc {
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+      font-size: 1.0625rem;
+      line-height: 1.7;
+    }
+
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .tech-card {
+      background: var(--bg-primary);
+      padding: 1.5rem;
+      border-radius: 16px;
+      border: 1px solid rgba(0, 51, 102, 0.08);
+      transition: all 0.3s ease;
+    }
+
+    .tech-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 51, 102, 0.08);
+    }
+
+    .tech-card-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, rgba(0, 51, 102, 0.1), rgba(0, 51, 102, 0.05));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .tech-card-icon.purple {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(124, 58, 237, 0.05));
+    }
+
+    .tech-card-icon svg {
+      width: 24px;
+      height: 24px;
+      color: var(--beihang-blue);
+    }
+
+    .tech-card-icon.purple svg {
+      color: var(--purple-accent);
+    }
+
+    .tech-card h4 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.0625rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+
+    .tech-card p {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .tech-leaderboard {
+      background: var(--bg-card);
+      border-radius: 20px;
+      padding: 2rem;
+      border: 1px solid rgba(0, 51, 102, 0.1);
+      box-shadow: 0 4px 24px rgba(0, 51, 102, 0.06);
+    }
+
+    .leaderboard-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .leaderboard-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, var(--beihang-blue), var(--purple-accent));
+      color: white;
+      padding: 0.4rem 1rem;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    .leaderboard-badge svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .leaderboard-header h4 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .leaderboard-subtitle {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .leaderboard-table {
+      margin: 1.5rem 0;
+    }
+
+    .leaderboard-row {
+      display: grid;
+      grid-template-columns: 40px 1fr 100px 80px;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      align-items: center;
+      font-size: 0.9375rem;
+    }
+
+    .leaderboard-row.header {
+      background: rgba(0, 51, 102, 0.03);
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.8125rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .leaderboard-row:not(.header):hover {
+      background: rgba(0, 51, 102, 0.02);
+    }
+
+    .leaderboard-row .rank {
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .leaderboard-row .model {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .leaderboard-row .venue {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
+
+    .leaderboard-row .score {
+      font-family: 'Sora', monospace;
+      font-weight: 600;
+      color: var(--beihang-blue);
+      text-align: right;
+    }
+
+    .leaderboard-row.highlight-ours {
+      background: linear-gradient(135deg, rgba(0, 51, 102, 0.08), rgba(124, 58, 237, 0.05));
+      border: 1px solid rgba(0, 51, 102, 0.15);
+    }
+
+    .leaderboard-row.highlight-ours .rank {
+      color: var(--beihang-blue);
+    }
+
+    .ours-tag {
+      display: inline-block;
+      background: var(--beihang-blue);
+      color: white;
+      font-size: 0.625rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .leaderboard-source {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(0, 51, 102, 0.06);
+    }
+
+    .leaderboard-source a {
+      color: var(--purple-accent);
+      text-decoration: none;
+    }
+
+    .leaderboard-source a:hover {
+      text-decoration: underline;
+    }
+
+    /* ========== Team Section ========== */
+    .team {
+      padding: 6rem 2rem;
+      background: var(--bg-primary);
+    }
+
+    .team-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .team-content {
+      margin-top: 3rem;
+    }
+
+    .team-group {
+      margin-bottom: 3rem;
+    }
+
+    .team-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .team-group-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .team-list {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .team-list.advisors {
+      gap: 1.5rem;
+    }
+
+    .team-list.advisors .team-item {
+      padding: 1.25rem 2rem;
+    }
+
+    .team-list.advisors .name-cn {
+      font-size: 1.25rem;
+    }
+
+    .team-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 1rem 1.5rem;
+      background: var(--bg-card);
+      border-radius: 12px;
+      border: 1px solid rgba(0, 51, 102, 0.08);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .team-item::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 3px;
+      background: var(--beihang-blue);
+      border-radius: 3px 3px 0 0;
+      transition: width 0.3s ease;
+    }
+
+    .team-item.purple::before {
+      background: var(--purple-accent);
+    }
+
+    .team-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 51, 102, 0.1);
+    }
+
+    .team-item:hover::before {
+      width: 60%;
+    }
+
+    .name-cn {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .name-en {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .team-affiliation {
+      margin-top: 4rem;
+      text-align: center;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(0, 51, 102, 0.08);
+    }
+
+    .affiliation-main {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--beihang-blue);
+      margin-bottom: 0.5rem;
+    }
+
+    .affiliation-sub {
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+    }
+
+    /* ========== Footer ========== */
+    .footer {
+      padding: 3rem 2rem 4rem;
+      border-top: 1px solid rgba(0, 51, 102, 0.08);
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .footer-brand svg {
+      width: 32px;
+      height: 32px;
+      color: var(--beihang-blue);
+    }
+
+    .footer-brand span {
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: 1.125rem;
+      color: var(--beihang-blue);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .footer-links a {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9375rem;
+      transition: color 0.2s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--beihang-blue);
+    }
+
+    .footer-links a svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .footer-copyright {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    /* ========== Animations ========== */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateX(-50%) translateY(0);
+      }
+      40% {
+        transform: translateX(-50%) translateY(-10px);
+      }
+      60% {
+        transform: translateX(-50%) translateY(-5px);
+      }
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    /* Scroll animations */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.8s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ========== Responsive ========== */
+    @media (max-width: 768px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .leaderboard-row {
+        grid-template-columns: 32px 1fr 70px 60px;
+        font-size: 0.8125rem;
+        padding: 0.6rem 0.75rem;
+      }
+
+      .leaderboard-row .venue {
+        font-size: 0.6875rem;
+      }
+
+      .team-list.advisors {
+        gap: 1rem;
+      }
+
+      .team-list.advisors .team-item {
+        padding: 1rem 1.5rem;
+      }
+
+      .footer-content {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .footer-links {
+        justify-content: center;
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Hero Section -->
+  <section class="hero">
+    <svg class="hero-bg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="lineGradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#003366" stop-opacity="0.1"/>
+          <stop offset="50%" stop-color="#003366" stop-opacity="0.3"/>
+          <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.1"/>
+        </linearGradient>
+        <linearGradient id="lineGradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.1"/>
+          <stop offset="50%" stop-color="#7c3aed" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#003366" stop-opacity="0.1"/>
+        </linearGradient>
+      </defs>
+      
+      <!-- Grid pattern -->
+      <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+        <path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(0,51,102,0.03)" stroke-width="1"/>
+      </pattern>
+      <rect width="100%" height="100%" fill="url(#grid)"/>
+      
+      <!-- Animated time series lines -->
+      <g class="chart-lines">
+        <path d="M-100,450 Q200,380 400,420 T700,350 T1000,400 T1300,320 T1600,380" 
+              fill="none" stroke="url(#lineGradient1)" stroke-width="3" stroke-linecap="round">
+          <animate attributeName="d" 
+                   values="M-100,450 Q200,380 400,420 T700,350 T1000,400 T1300,320 T1600,380;
+                           M-100,420 Q200,450 400,380 T700,420 T1000,350 T1300,400 T1600,340;
+                           M-100,450 Q200,380 400,420 T700,350 T1000,400 T1300,320 T1600,380"
+                   dur="8s" repeatCount="indefinite"/>
+        </path>
+        <path d="M-100,550 Q300,480 500,520 T800,450 T1100,500 T1400,420 T1600,480" 
+              fill="none" stroke="url(#lineGradient2)" stroke-width="2" stroke-linecap="round" stroke-dasharray="8,4">
+          <animate attributeName="d" 
+                   values="M-100,550 Q300,480 500,520 T800,450 T1100,500 T1400,420 T1600,480;
+                           M-100,520 Q300,550 500,480 T800,520 T1100,450 T1400,500 T1600,440;
+                           M-100,550 Q300,480 500,520 T800,450 T1100,500 T1400,420 T1600,480"
+                   dur="10s" repeatCount="indefinite"/>
+        </path>
+      </g>
+      
+      <!-- Event markers -->
+      <g class="event-markers">
+        <circle cx="400" cy="420" r="8" fill="#003366" opacity="0.6">
+          <animate attributeName="r" values="6;10;6" dur="3s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;0.3;0.6" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="400" cy="420" r="16" fill="none" stroke="#003366" stroke-width="2" opacity="0.3">
+          <animate attributeName="r" values="12;24;12" dur="3s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.3;0;0.3" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        
+        <circle cx="800" cy="450" r="8" fill="#7c3aed" opacity="0.6">
+          <animate attributeName="r" values="6;10;6" dur="4s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;0.3;0.6" dur="4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="800" cy="450" r="16" fill="none" stroke="#7c3aed" stroke-width="2" opacity="0.3">
+          <animate attributeName="r" values="12;24;12" dur="4s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.3;0;0.3" dur="4s" repeatCount="indefinite"/>
+        </circle>
+        
+        <circle cx="1100" cy="400" r="8" fill="#003366" opacity="0.6">
+          <animate attributeName="r" values="6;10;6" dur="3.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;0.3;0.6" dur="3.5s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+      
+      <!-- Decorative elements -->
+      <circle cx="200" cy="200" r="150" fill="url(#lineGradient1)" opacity="0.05"/>
+      <circle cx="1300" cy="700" r="200" fill="url(#lineGradient2)" opacity="0.05"/>
+    </svg>
+
+    <div class="hero-content">
+      <div class="logo-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 3v18h18"/>
+          <path d="M7 16l4-8 4 4 5-9"/>
+        </svg>
+        小易猜猜 xiaoyi
+      </div>
+      
+      <h1 class="hero-title">
+        Make Time Series<br>
+        <span class="highlight">Forecast Great Again</span>
+      </h1>
+      
+      <p class="hero-subtitle">
+        Just Type, Just Guess, Just View<br>
+        <span style="font-size: 0.9em;">即敲，即猜，即看</span>
+      </p>
+      
+      <a href="#demo" class="hero-cta">
+        开始体验 Demo
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </a>
+    </div>
+
+    <div class="scroll-indicator">
+      <span>探索更多</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 5v14M5 12l7 7 7-7"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="section-header fade-in">
+      <span class="section-label">Core Features</span>
+      <h2 class="section-title">两大核心能力</h2>
+    </div>
+
+    <div class="features-grid">
+      <!-- Feature 1: 时序分析 -->
+      <div class="feature-card fade-in">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <path d="M3 9h18"/>
+            <path d="M9 21V9"/>
+            <path d="M13 13l2 2 4-4"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">时序分析</h3>
+        <p class="feature-desc">
+          对历史时间序列进行深度分析，自动识别关键事件并进行对齐标注，
+          智能切分重要区间，帮助你理解数据背后的故事。
+        </p>
+        <ul class="feature-list">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+            事件自动对齐与标注
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+            关键区间智能切分
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+            自然语言交互分析
+          </li>
+        </ul>
+        <div class="feature-image">
+          <video autoplay loop muted playsinline>
+            <source src="https://pub-67912da6dc924ee880a83954ec1c0107.r2.dev/history-tiny.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+
+      <!-- Feature 2: 时序预测 -->
+      <div class="feature-card fade-in">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">时序预测</h3>
+        <p class="feature-desc">
+          基于事件演化进行智能预测，不只是给出数字结果，
+          更能解释预测背后的逻辑，让每一次预测都有迹可循。
+        </p>
+        <ul class="feature-list">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+            事件驱动预测模型
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+            可解释的预测结果
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+            多模型集成支持
+          </li>
+        </ul>
+        <div class="feature-image">
+          <video autoplay loop muted playsinline>
+            <source src="https://pub-67912da6dc924ee880a83954ec1c0107.r2.dev/predict-tiny.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Demo Section -->
+  <section class="demo" id="demo">
+    <div class="demo-container">
+      <div class="demo-content fade-in">
+        <span class="section-label">Live Demo</span>
+        <h2 class="section-title">亲自体验小易的能力</h2>
+        <p style="color: var(--text-secondary); margin-top: 1rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+          通过自然语言与小易对话，探索时序数据的奥秘
+        </p>
+      </div>
+
+      <div class="demo-preview fade-in">
+        <div class="demo-window">
+          <div class="demo-window-header">
+            <span class="demo-window-dot"></span>
+            <span class="demo-window-dot"></span>
+            <span class="demo-window-dot"></span>
+          </div>
+          <div class="demo-window-content">
+            <video autoplay loop muted playsinline>
+              <source src="https://pub-67912da6dc924ee880a83954ec1c0107.r2.dev/full-tiny.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 3rem;" class="fade-in">
+        <a href="#" class="hero-cta demo-coming-soon" onclick="return false;">
+          Demo 即将上线
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack Section -->
+  <section class="tech-stack">
+    <div class="tech-container">
+      <div class="section-header fade-in">
+        <span class="section-label">Technology</span>
+        <h2 class="section-title">技术架构</h2>
+      </div>
+
+      <div class="tech-content fade-in">
+        <div class="tech-highlight">
+          <div class="tech-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+            <span>Core Architecture</span>
+          </div>
+          <h3 class="tech-headline">LLM 调度时序小模型</h3>
+          <p class="tech-desc">
+            采用大语言模型作为智能调度中枢，统一编排多个专业时序预测模型，
+            实现自然语言理解与精准预测的完美结合。
+          </p>
+        </div>
+
+        <div class="tech-grid">
+          <div class="tech-card">
+            <div class="tech-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v6m0 6v10"/>
+                <path d="M21 12h-6m-6 0H1"/>
+                <path d="M18.4 5.6l-4.2 4.2m-4.4 4.4l-4.2 4.2"/>
+                <path d="M5.6 5.6l4.2 4.2m4.4 4.4l4.2 4.2"/>
+              </svg>
+            </div>
+            <h4>LLM 智能中枢</h4>
+            <p>DeepSeek 驱动的自然语言理解与任务编排</p>
+          </div>
+
+          <div class="tech-card">
+            <div class="tech-card-icon purple">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 3v18h18"/>
+                <path d="M7 12l4-4 4 4 5-5"/>
+              </svg>
+            </div>
+            <h4>时序预测引擎</h4>
+            <p>Prophet / XGBoost / DLinear 多模型集成</p>
+          </div>
+
+          <div class="tech-card">
+            <div class="tech-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/>
+                <path d="M14 2v6h6"/>
+                <path d="M16 13H8"/>
+                <path d="M16 17H8"/>
+                <path d="M10 9H8"/>
+              </svg>
+            </div>
+            <h4>知识检索</h4>
+            <p>BGE 向量模型 + Qdrant 语义搜索</p>
+          </div>
+
+          <div class="tech-card">
+            <div class="tech-card-icon purple">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+              </svg>
+            </div>
+            <h4>实时流式响应</h4>
+            <p>SSE + Redis 消息队列驱动的实时交互</p>
+          </div>
+        </div>
+
+        <div class="tech-leaderboard fade-in">
+          <div class="leaderboard-header">
+            <div class="leaderboard-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 21h8m-4-4v4m-4-8l4-4 4 4m2-8H6a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2z"/>
+              </svg>
+              <span>Model Leaderboard</span>
+            </div>
+            <h4>时序预测模型排行榜</h4>
+            <p class="leaderboard-subtitle">Multivariate Long-term Forecasting (MSE ↓)</p>
+          </div>
+          
+          <div class="leaderboard-table">
+            <div class="leaderboard-row header">
+              <span class="rank">#</span>
+              <span class="model">Model</span>
+              <span class="venue">Venue</span>
+              <span class="score">Avg MSE</span>
+            </div>
+            <div class="leaderboard-row">
+              <span class="rank">1</span>
+              <span class="model">iTransformer</span>
+              <span class="venue">ICLR'24</span>
+              <span class="score">0.311</span>
+            </div>
+            <div class="leaderboard-row">
+              <span class="rank">2</span>
+              <span class="model">PatchTST</span>
+              <span class="venue">ICLR'23</span>
+              <span class="score">0.354</span>
+            </div>
+            <div class="leaderboard-row">
+              <span class="rank">3</span>
+              <span class="model">TimesNet</span>
+              <span class="venue">ICLR'23</span>
+              <span class="score">0.371</span>
+            </div>
+            <div class="leaderboard-row">
+              <span class="rank">4</span>
+              <span class="model">DLinear</span>
+              <span class="venue">AAAI'23</span>
+              <span class="score">0.415</span>
+            </div>
+            <div class="leaderboard-row highlight-ours">
+              <span class="rank">5</span>
+              <span class="model">Informer <span class="ours-tag">Ours</span></span>
+              <span class="venue">AAAI'21 Best</span>
+              <span class="score">0.448</span>
+            </div>
+            <div class="leaderboard-row">
+              <span class="rank">6</span>
+              <span class="model">Autoformer</span>
+              <span class="venue">NeurIPS'21</span>
+              <span class="score">0.461</span>
+            </div>
+          </div>
+          
+          <p class="leaderboard-source">
+            数据来源：<a href="https://decisionintelligence.github.io/OpenTS/" target="_blank">OpenTS-Bench</a> · 华东师范大学 Decision Intelligence Lab
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Section -->
+  <section class="team">
+    <div class="team-container">
+      <div class="section-header fade-in">
+        <span class="section-label">Team</span>
+        <h2 class="section-title">研究团队</h2>
+      </div>
+
+      <div class="team-content fade-in">
+        <div class="team-group">
+          <h3 class="team-group-title">指导老师</h3>
+          <div class="team-list advisors">
+            <div class="team-item">
+              <span class="name-cn">周号益</span>
+              <span class="name-en">Haoyi Zhou</span>
+            </div>
+            <div class="team-item purple">
+              <span class="name-cn">陈天宇</span>
+              <span class="name-en">Tianyu Chen</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="team-group">
+          <h3 class="team-group-title">团队成员</h3>
+          <div class="team-list members">
+            <div class="team-item">
+              <span class="name-cn">赵大为</span>
+              <span class="name-en">Dawei Zhao</span>
+            </div>
+            <div class="team-item purple">
+              <span class="name-cn">杨凯伟</span>
+              <span class="name-en">Kaiwei Yang</span>
+            </div>
+            <div class="team-item">
+              <span class="name-cn">罗智阳</span>
+              <span class="name-en">Zhiyang Luo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="team-affiliation fade-in">
+        <p class="affiliation-main">Beihang University (BUAA)</p>
+        <p class="affiliation-sub">ACT 实验室 · SCAL 小组</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+    <div class="footer-content">
+      <div class="footer-brand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 3v18h18"/>
+          <path d="M7 16l4-8 4 4 5-9"/>
+        </svg>
+        <span>小易猜猜</span>
+      </div>
+
+      <div class="footer-links">
+        <a href="https://github.com/Tarpelite/xiaoyi" target="_blank">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          GitHub
+        </a>
+        <a href="mailto:tianyuc@buaa.edu.cn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <path d="M22 6l-10 7L2 6"/>
+          </svg>
+          tianyuc@buaa.edu.cn
+        </a>
+      </div>
+
+      <div class="footer-copyright">
+        © 2026 ACT 实验室 · SCAL 小组 @ BUAA
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Scroll animation
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.fade-in').forEach(el => {
+      observer.observe(el);
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+</body>
+</html>
